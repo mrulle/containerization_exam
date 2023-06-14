@@ -1,0 +1,96 @@
+# docker pull node:20.3.0-slim
+# docker pull mariadb:10.6.14
+version: '3.8'
+services:
+  frontend:
+    image: "frontend:0.0.1"
+    ports:
+      - "8000:80"
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
+        window: 10s
+    networks:
+      - public
+  
+  runonce:
+    image: "backend:0.0.1"
+    environment:
+      DB_USERNAME: zay_prod
+      DB_PASSWORD: user123
+      DB_DATABASE: zay_prod
+      DB_HOSTNAME: db
+      NODE_ENV: production
+    command: '/bin/sh -c "npm run db:migrate && npm run db:seed"'
+    deploy:
+      mode: replicated
+      replicas: 0
+      restart_policy:
+        condition: none
+    networks:
+      - private
+
+  backend:
+    image: "backend:0.0.1"
+    environment:
+      DB_USERNAME: zay_prod
+      DB_PASSWORD: user123
+      DB_DATABASE: zay_prod
+      DB_HOSTNAME: db
+      NODE_ENV: production
+    command: '/bin/sh -c "node index.js"'
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
+        window: 10s
+    ports:
+      - "8080:3000" # for at teste det udefra
+    networks:
+      - public
+      - private
+
+  # IMPORTANT: may NOT be scaled, because instances will share the same docker-volume for persistance
+  db:
+    image: "mariadb:10.6.14"
+    # ports: 
+    #   - "3306:3306"
+    networks:
+      - private
+    volumes:
+      - db_persistance:/var/lib/mysql:rw
+    environment:
+      MARIADB_DATABASE: zay_prod
+      MARIADB_ROOT_PASSWORD: root123
+      MARIADB_USER: zay_prod
+      MARIADB_PASSWORD: user123
+    # entry_point: ./usr/local/bin/docker-entrypoint.sh
+    healthcheck:
+      test: mysqladmin ping -h 127.0.0.1 -u $$MARIADB_USER --password=$$MARIADB_PASSWORD
+      start_period: 5s
+      interval: 5s
+      timeout: 5s
+      retries: 55
+    deploy:
+      # since there is only one node in the current swarm, this prevents the db from being replicated
+      # and in the future, it prevents multiple databases to be run on same node in the swarm
+      mode: global 
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 5
+        window: 40s
+    
+volumes:
+  db_persistance:
+
+networks:
+  public:
+  private:

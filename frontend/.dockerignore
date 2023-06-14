@@ -1,2 +1,4 @@
 README.md
 DOCKERFILE
+node_modules/
+.vscode/
