@@ -7,7 +7,16 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: IndexView
+      component: IndexView,
+      // beforeEnter: (to, from, next) => {
+      //   const { uri } = to.query;
+      //   if (uri != null && uri != '/') {
+      //     next(false);
+      //     router.push(uri);
+      //   } else {
+      //     next();
+      //   }
+      // }
     },
     {
       path: '/about',
