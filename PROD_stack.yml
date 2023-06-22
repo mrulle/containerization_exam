@@ -42,7 +42,8 @@ services:
       DB_DATABASE: zay_prod
       DB_HOSTNAME: db
       NODE_ENV: production
-    command: '/bin/sh -c "node index.js"'
+    command: '/bin/sh -c "npm start"'
+    # command: '/bin/sh -c "node index.js"'
     deploy:
       mode: replicated
       replicas: 1
