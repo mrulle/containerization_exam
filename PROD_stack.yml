@@ -41,7 +41,17 @@ services:
       DB_PASSWORD: user123
       DB_DATABASE: zay_prod
       DB_HOSTNAME: db
+      # DB_USERNAME: /run/secrets/DB_USERNAME
+      # DB_PASSWORD: /run/secrets/DB_PASSWORD
+      # DB_DATABASE: /run/secrets/DB_DATABASE
+      # DB_HOSTNAME: /run/secrets/DB_HOSTNAME
       NODE_ENV: production
+    secrets:
+      - DB_USERNAME
+      - DB_PASSWORD
+      - DB_DATABASE
+      - DB_HOSTNAME
+
     command: '/bin/sh -c "npm start"'
     # command: '/bin/sh -c "node index.js"'
     deploy:
@@ -88,7 +98,15 @@ services:
         delay: 10s
         max_attempts: 5
         window: 40s
-    
+secrets:
+  DB_USERNAME:
+    file: ./secrets/DB_USERNAME
+  DB_PASSWORD:
+    file: ./secrets/DB_PASSWORD
+  DB_DATABASE:
+    file: ./secrets/DB_DATABASE
+  DB_HOSTNAME:
+    file: ./secrets/DB_HOSTNAME
 volumes:
   db_persistance:
 
